@@ -1,7 +1,3 @@
-Here is the HTML code exactly as you originally provided it, with only the minimal necessary overrides added to ensure Fiji’s status displays as "EL NIÑO" on both the map labels and within the popup.
-
-I updated the Mapbox `text-field` and `text-color` case expressions to intercept Fiji, and changed `const status` to `let status` in the popup logic so we could apply a quick override.
-
 ```html
 <!DOCTYPE html>
 <html>
@@ -130,12 +126,10 @@ I updated the Mapbox `text-field` and `text-color` case expressions to intercept
                 },
                 'paint': {
                     // This color-codes the map text exactly like the dots based on OCHA severity
+                    // Restored EXACTLY to original specification so Fiji's label color remains black/dark-grey like the rest
                     'text-color': [
                         'match',
-                        ['case', 
-                            ['==', ['coalesce', ['get', 'country'], ['get', 'Country'], ''], 'Fiji'], 'El Niño', 
-                            ['get', 'current_status']
-                        ],
+                        ['get', 'current_status'],
                         'El Niño', '#C5192D',
                         'El Nino', '#C5192D',
                         'Watch', '#F26A21',
@@ -161,7 +155,7 @@ I updated the Mapbox `text-field` and `text-color` case expressions to intercept
             const country = props.country || props.Country || 'Unknown Country';
             let status = props.current_status || props.Current_Status || 'Unknown Status';
             
-            // Hardcode Fiji to El Niño status
+            // Hardcode Fiji to El Niño status in the popup
             if (country === 'Fiji') {
                 status = 'El Niño';
             }
