@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -102,6 +101,18 @@
         // --- 2. DYNAMICALLY ADD STYLED PERMANENT TEXT LABELS ---
         const dotLayer = map.getLayer(layerID);
         if (dotLayer) {
+
+            // Intercept and override the Mapbox dot (circle) color for Fiji to red (#C5192D) and Marshall Islands to green (#A8D18D)
+            const currentCircleColor = map.getPaintProperty(layerID, 'circle-color');
+            if (currentCircleColor) {
+                map.setPaintProperty(layerID, 'circle-color', [
+                    'case',
+                    ['==', ['coalesce', ['get', 'country'], ['get', 'Country'], ''], 'Fiji'], '#C5192D',
+                    ['in', 'MARSHALL', ['upcase', ['coalesce', ['get', 'country'], ['get', 'Country'], '']]], '#A8D18D',
+                    currentCircleColor
+                ]);
+            }
+
             map.addLayer({
                 'id': 'pacific-text-labels',
                 'type': 'symbol',
@@ -116,6 +127,7 @@
                         ['upcase', 
                             ['case', 
                                 ['==', ['coalesce', ['get', 'country'], ['get', 'Country'], ''], 'Fiji'], 'El Niño', 
+                                ['in', 'MARSHALL', ['upcase', ['coalesce', ['get', 'country'], ['get', 'Country'], '']]], 'Neutral',
                                 ['coalesce', ['get', 'current_status'], ['get', 'Current_Status'], '']
                             ]
                         ], { 'font-scale': 0.85 }
@@ -126,7 +138,7 @@
                 },
                 'paint': {
                     // This color-codes the map text exactly like the dots based on OCHA severity
-                    // Restored EXACTLY to original specification so Fiji's label color remains black/dark-grey like the rest
+                    // Restored EXACTLY to original specification so label color remains black/dark-grey like the rest
                     'text-color': [
                         'match',
                         ['get', 'current_status'],
@@ -158,6 +170,10 @@
             // Hardcode Fiji to El Niño status in the popup
             if (country === 'Fiji') {
                 status = 'El Niño';
+            }
+            // Hardcode Marshall Islands to Neutral status in the popup
+            if (country.toUpperCase().includes('MARSHALL')) {
+                status = 'Neutral';
             }
 
             const dateUpdated = props.current_date || props.Current_Date || 'Unknown Date';
@@ -235,5 +251,3 @@
 
 </body>
 </html>
-
-```
