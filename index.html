@@ -6,6 +6,8 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+<!-- Chart.js library for the summary pie chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     body { margin: 0; padding: 0; background: #eef1f6; font-family: 'Open Sans', Arial, sans-serif; overflow: hidden; }
     
@@ -40,8 +42,10 @@
         display: flex;
         align-items: center;
     }
+    
     #header-logo img {
-        height: 45px;
+        height: 40px;
+        width: auto;
         /* Converts the standard black/colored OCHA logo to pure white */
         filter: brightness(0) invert(1); 
     }
@@ -49,6 +53,46 @@
     /* Map shifted down to accommodate header */
     #map { position: absolute; top: 70px; bottom: 0; width: 100%; }
     
+    /* Floating Graphic Panel (Bottom Left) */
+    #graphic-panel {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        width: 500px;
+        max-width: 40vw; 
+        z-index: 1000;
+        pointer-events: none; 
+    }
+    #graphic-panel img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+
+    /* Floating Chart Panel (Top Right) */
+    #chart-panel {
+        position: absolute;
+        top: 90px;
+        right: 25px;
+        width: 250px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        z-index: 1000;
+    }
+    #chart-panel h3 {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: #444;
+        text-transform: uppercase;
+        text-align: center;
+        border-bottom: 2px solid #eef1f6;
+        padding-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+
     /* Popup General Styling */
     .mapboxgl-popup { max-width: 340px; }
     .mapboxgl-popup-content { border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); padding: 15px; }
@@ -98,12 +142,25 @@
         <p>2026 ADVISORY DASHBOARD</p>
     </div>
     <div id="header-logo">
-        <!-- Switched to the more stable SVG source URL to fix the broken link -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cd/United_Nations_Office_for_the_Coordination_of_Humanitarian_Affairs_Logo.svg" alt="OCHA Logo">
+        <!-- Using a highly reliable PNG link with an onerror fallback to prevent broken images -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/United_Nations_Office_for_the_Coordination_of_Humanitarian_Affairs_Logo.svg/640px-United_Nations_Office_for_the_Coordination_of_Humanitarian_Affairs_Logo.svg.png" 
+             onerror="this.onerror=null; this.src='https://www.unocha.org/themes/custom/ocha_basic/logo.svg';" 
+             alt="OCHA Logo">
     </div>
 </div>
 
 <div id="map"></div>
+
+<!-- Floating Panel for the New Graphic (Bottom Left) -->
+<div id="graphic-panel">
+    <img src="Screenshot 2026-08-25 at 11.42.56 AM.png" alt="Recent and Forecast ENSO Update Graphic">
+</div>
+
+<!-- Floating Panel for the Summary Chart (Top Right) -->
+<div id="chart-panel">
+    <h3>Status Summary</h3>
+    <canvas id="statusChart"></canvas>
+</div>
 
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoibmVtYWlha290bzIwMjQiLCJhIjoiY2x5ODRmdmVqMGJpajJrcTZ0Z2p3YjZmMiJ9.1WaNl8YlKy68xDRh5FYRLA';
@@ -115,6 +172,8 @@
         zoom: 3.2,         
         projection: 'mercator'
     });
+
+    let statusChart; // Variable to hold the Chart.js instance
 
     map.on('load', () => {
         
@@ -132,7 +191,7 @@
         const dotLayer = map.getLayer(layerID);
         if (dotLayer) {
 
-            // Intercept and override the Mapbox dot (circle) color for Fiji, Samoa, Tuvalu, and Nauru to red (#C5192D)
+            // Intercept and override the Mapbox dot color for Fiji, Samoa, Tuvalu, and Nauru
             const currentCircleColor = map.getPaintProperty(layerID, 'circle-color');
             if (currentCircleColor) {
                 map.setPaintProperty(layerID, 'circle-color', [
@@ -195,7 +254,83 @@
 
         const interactiveLayers = [layerID, 'pacific-text-labels'];
 
-        // --- 3. POPUP LOGIC ---
+        // --- 3. CHART.JS SUMMARY LOGIC ---
+        // We use 'idle' so the chart updates whenever the map finishes loading or panning
+        map.on('idle', () => {
+            const features = map.queryRenderedFeatures({ layers: [layerID] });
+            
+            // Tally counts uniquely by country to avoid duplicate tile artifacts
+            const statusCounts = { 'El Niño': 0, 'Advisory': 0, 'Watch': 0, 'Neutral': 0, 'La Niña': 0 };
+            const processedCountries = new Set();
+
+            features.forEach(f => {
+                const props = f.properties;
+                const country = props.country || props.Country;
+                if (!country || processedCountries.has(country)) return;
+                processedCountries.add(country);
+
+                let status = props.current_status || props.Current_Status || 'Unknown';
+                
+                // Enforce hardcoded specific countries exactly like the map labels
+                const elNinoCountries = ['Fiji', 'Samoa', 'Tuvalu', 'Nauru'];
+                if (elNinoCountries.includes(country)) {
+                    status = 'El Niño';
+                } else if (country.toUpperCase().includes('MARSHALL')) {
+                    status = 'Neutral';
+                }
+
+                // Categorize for the Pie Chart
+                if (status.includes('El Niño') || status.includes('El Nino')) statusCounts['El Niño']++;
+                else if (status.includes('Advisory') || status.includes('Alert')) statusCounts['Advisory']++;
+                else if (status.includes('Watch')) statusCounts['Watch']++;
+                else if (status.includes('La Niña') || status.includes('La Nina')) statusCounts['La Niña']++;
+                else if (status.includes('Neutral')) statusCounts['Neutral']++;
+            });
+
+            // If no data is in view, we can skip updating or show zeroed out
+            const chartData = [
+                statusCounts['El Niño'], 
+                statusCounts['Advisory'], 
+                statusCounts['Watch'], 
+                statusCounts['Neutral'], 
+                statusCounts['La Niña']
+            ];
+
+            if (statusChart) {
+                statusChart.data.datasets[0].data = chartData;
+                statusChart.update();
+            } else {
+                const ctx = document.getElementById('statusChart').getContext('2d');
+                statusChart = new Chart(ctx, {
+                    type: 'doughnut', // Doughnut looks cleaner, change to 'pie' if preferred
+                    data: {
+                        labels: ['El Niño', 'Advisory', 'Watch', 'Neutral', 'La Niña'],
+                        datasets: [{
+                            data: chartData,
+                            backgroundColor: [
+                                '#C5192D', // Red
+                                '#F9A41A', // Yellow/Orange
+                                '#F26A21', // Light Orange
+                                '#A8D18D', // Green (Matches the meter neutral graphic)
+                                '#245195'  // Dark Blue
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // --- 4. POPUP LOGIC ---
         map.on('click', interactiveLayers, (e) => {
             const coordinates = e.features[0].geometry.coordinates.slice();
             const props = e.features[0].properties;
