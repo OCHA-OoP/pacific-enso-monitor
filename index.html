@@ -69,6 +69,13 @@
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     }
+    #graphic-panel .source-text {
+        font-size: 10px;
+        color: #444;
+        margin-top: 5px;
+        text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        font-weight: bold;
+    }
 
     /* Floating Chart Panel (Top Right) */
     #chart-panel {
@@ -142,10 +149,8 @@
         <p>2026 ADVISORY DASHBOARD</p>
     </div>
     <div id="header-logo">
-        <!-- Using a highly reliable PNG link with an onerror fallback to prevent broken images -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/United_Nations_Office_for_the_Coordination_of_Humanitarian_Affairs_Logo.svg/640px-United_Nations_Office_for_the_Coordination_of_Humanitarian_Affairs_Logo.svg.png" 
-             onerror="this.onerror=null; this.src='https://www.unocha.org/themes/custom/ocha_basic/logo.svg';" 
-             alt="OCHA Logo">
+        <!-- Switched to official unocha.org domain SVG directly -->
+        <img src="https://www.unocha.org/themes/custom/ocha_basic/logo.svg" alt="OCHA Logo">
     </div>
 </div>
 
@@ -153,7 +158,9 @@
 
 <!-- Floating Panel for the New Graphic (Bottom Left) -->
 <div id="graphic-panel">
-    <img src="Screenshot 2026-08-25 at 11.42.56 AM.png" alt="Recent and Forecast ENSO Update Graphic">
+    <!-- URL Encoded filename so browsers don't break on the spaces -->
+    <img src="Screenshot%202026-08-25%20at%2011.42.56%20AM.png" alt="Recent and Forecast ENSO Update Graphic">
+    <p class="source-text">Source: Earth Science New Zealand (Sept- Nov 2026)</p>
 </div>
 
 <!-- Floating Panel for the Summary Chart (Top Right) -->
