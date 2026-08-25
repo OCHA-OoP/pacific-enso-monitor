@@ -5,6 +5,8 @@
 <title>PACIFIC REGIONAL EL NIÑO MONITORING 2026</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet">
+<!-- Import Roboto Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
 <!-- Chart.js library for the summary pie chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -36,6 +38,18 @@
     #header-text h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
     #header-text p { margin: 3px 0 0 0; font-size: 13px; font-weight: bold; opacity: 0.9; }
 
+    /* Top Right Update Text */
+    #header-update {
+        position: absolute;
+        right: 25px;
+        color: #ffffff;
+        font-family: 'Roboto', sans-serif;
+        font-style: italic;
+        font-size: 11px;
+        opacity: 0.95;
+        letter-spacing: 0.3px;
+    }
+
     /* Map shifted down to accommodate header */
     #map { position: absolute; top: 70px; bottom: 0; width: 100%; }
 
@@ -60,6 +74,49 @@
         border-bottom: 2px solid #eef1f6;
         padding-bottom: 8px;
         letter-spacing: 0.5px;
+    }
+
+    /* Regional Forecasts and Sources Panel (Bottom Left) */
+    #forecasts-panel {
+        position: absolute;
+        bottom: 25px;
+        left: 25px;
+        width: 320px;
+        max-width: 40vw;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        z-index: 1000;
+    }
+    #forecasts-panel h3 {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: #444;
+        text-transform: uppercase;
+        text-align: center;
+        border-bottom: 2px solid #eef1f6;
+        padding-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+    #forecasts-panel ol {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 11px;
+        color: #333;
+        line-height: 1.4;
+    }
+    #forecasts-panel li {
+        margin-bottom: 10px;
+    }
+    #forecasts-panel a {
+        color: #418FDE;
+        text-decoration: none;
+        font-weight: bold;
+        word-break: break-all;
+    }
+    #forecasts-panel a:hover {
+        text-decoration: underline;
     }
 
     /* Popup General Styling */
@@ -109,14 +166,27 @@
         <h1>PACIFIC REGIONAL EL NIÑO MONITORING</h1>
         <p>2026 ADVISORY DASHBOARD</p>
     </div>
+    <div id="header-update">
+        Update as of 12 August, 2026
+    </div>
 </div>
 
 <div id="map"></div>
 
-<!-- Floating Panel for the Summary Chart (Top Right) -->
+<!-- Status Summary Chart Panel (Top Right) -->
 <div id="chart-panel">
     <h3>Status Summary</h3>
     <canvas id="statusChart"></canvas>
+</div>
+
+<!-- Regional Forecasts and Sources Panel (Bottom Left) -->
+<div id="forecasts-panel">
+    <h3>Regional Forecasts and Sources</h3>
+    <ol>
+        <li><strong>Earth Science New Zealand:</strong> A monthly summary of the climate in the tropical South Pacific islands, with an outlook for the coming months (Source: Earth Science New Zealand).<br><a href="https://niwa.co.nz/climate-and-weather/island-climate-update" target="_blank">https://niwa.co.nz/climate-and-weather/island-climate-update</a></li>
+        <li><strong>Bureau of Meteorology:</strong><br><a href="https://www.bom.gov.au/climate/enso/ninoIndex=nino3.4&index=rnino34&period=weekly" target="_blank">https://www.bom.gov.au/climate/enso/ninoIndex=nino3.4&index=rnino34&period=weekly</a></li>
+        <li><strong>SPREP:</strong><br><a href="https://sprep.org/news" target="_blank">https://sprep.org/news</a></li>
+    </ol>
 </div>
 
 <script>
