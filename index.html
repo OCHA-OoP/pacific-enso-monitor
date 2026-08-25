@@ -30,6 +30,19 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
     
+    /* UNOCHA Logo Styling on Left of Header */
+    #header-logo {
+        position: absolute;
+        left: 25px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+    }
+    #header-logo img {
+        height: 38px;
+        width: auto;
+    }
+
     #header-text {
         color: #ffffff;
         text-align: center;
@@ -162,12 +175,16 @@
 <body>
 
 <div id="header">
+    <div id="header-logo">
+        <!-- UNOCHA Official Emblem/Logo placeholder -->
+        <img src="https://www.unocha.org/sites/default/files/UNOCHA_logo_blue_white_text.png" alt="UNOCHA Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia5/commons/thumb/e/ee/UN_emblem_blue.svg/1024px-UN_emblem_blue.svg.png'">
+    </div>
     <div id="header-text">
         <h1>PACIFIC REGIONAL EL NIÑO MONITORING</h1>
         <p>2026 ADVISORY DASHBOARD</p>
     </div>
     <div id="header-update">
-        Update as of 12 August, 2026
+        Update as of 25 August, 2026
     </div>
 </div>
 
@@ -184,8 +201,8 @@
     <h3>Regional Forecasts and Sources</h3>
     <ol>
         <li><strong>Earth Science New Zealand:</strong> A monthly summary of the climate in the tropical South Pacific islands, with an outlook for the coming months (Source: Earth Science New Zealand).<br><a href="https://niwa.co.nz/climate-and-weather/island-climate-update" target="_blank">https://niwa.co.nz/climate-and-weather/island-climate-update</a></li>
-        <li><strong>Bureau of Meteorology:</strong><br><a href="https://www.bom.gov.au/climate/enso/ninoIndex=nino3.4&index=rnino34&period=weekly" target="_blank">https://www.bom.gov.au/climate/enso/ninoIndex=nino3.4&index=rnino34&period=weekly</a></li>
-        <li><strong>SPREP:</strong><br><a href="https://sprep.org/news" target="_blank">https://sprep.org/news</a></li>
+        <li><a href="https://www.bom.gov.au/climate/enso/ninoIndex=nino3.4&index=rnino34&period=weekly" target="_blank">Bureau of Meteorology (BOM), Australia</a></li>
+        <li><a href="https://sprep.org/news" target="_blank">Secretariat of the Pacific Regional Environment Programme (SPREP)</a></li>
     </ol>
 </div>
 
