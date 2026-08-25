@@ -6,10 +6,12 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet">
 <!-- Import Roboto Font -->
-<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;1,400;700&display=swap" rel="stylesheet">
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
 <!-- Chart.js library for the summary pie chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js Datalabels Plugin for showing percentages directly on slices -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 <style>
     body { margin: 0; padding: 0; background: #eef1f6; font-family: 'Open Sans', Arial, sans-serif; overflow: hidden; }
     
@@ -30,18 +32,42 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
     
-    /* OCHA Logo Styling on Left of Header */
-    #header-logo {
+    /* OCHA Logo & Supported By Container on Left of Header */
+    #header-logo-container {
         position: absolute;
         left: 25px;
-        height: 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+    .supported-text {
+        font-family: 'Roboto', sans-serif;
+        font-size: 8.5px;
+        text-transform: uppercase;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        font-weight: 700;
+        opacity: 0.9;
+    }
+    .logo-row {
         display: flex;
         align-items: center;
+        gap: 6px;
     }
-    #header-logo img {
-        height: 38px;
+    #header-logo {
+        height: 28px;
         width: auto;
-        filter: brightness(0) invert(1); /* Makes the logo cleanly white to contrast against UN blue */
+        filter: brightness(0) invert(1);
+    }
+    .ocha-text {
+        font-family: 'Roboto', sans-serif;
+        font-size: 13px;
+        font-weight: bold;
+        color: #ffffff;
+        letter-spacing: 0.8px;
     }
 
     #header-text {
@@ -176,9 +202,12 @@
 <body>
 
 <div id="header">
-    <div id="header-logo">
-        <!-- OCHA Logo -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/UN_emblem_blue.svg" alt="OCHA Logo" onerror="this.src='https://www.unocha.org/sites/default/files/UNOCHA_logo_blue_white_text.png'">
+    <div id="header-logo-container">
+        <span class="supported-text">Supported by</span>
+        <div class="logo-row">
+            <img id="header-logo" src="https://upload.wikimedia.org/wikipedia/commons/e/ee/UN_emblem_blue.svg" alt="UN Logo" onerror="this.src='https://www.unocha.org/sites/default/files/UNOCHA_logo_blue_white_text.png'">
+            <span class="ocha-text">OCHA</span>
+        </div>
     </div>
     <div id="header-text">
         <h1>PACIFIC REGIONAL EL NIÑO MONITORING</h1>
@@ -193,7 +222,7 @@
 
 <!-- Status Summary Chart Panel (Top Right) -->
 <div id="chart-panel">
-    <h3>Status Summary</h3>
+    <h3>Summary of El Nino Status for PICs</h3>
     <canvas id="statusChart"></canvas>
 </div>
 
@@ -297,7 +326,7 @@
 
         const interactiveLayers = [layerID, 'pacific-text-labels'];
 
-        // --- 3. CHART.JS SUMMARY LOGIC ---
+        // --- 3. CHART.JS SUMMARY LOGIC WITH DATALABELS PLUGIN ---
         map.on('idle', () => {
             const features = map.queryRenderedFeatures({ layers: [layerID] });
             const statusCounts = { 'El Niño': 0, 'Advisory': 0, 'Watch': 0, 'Neutral': 0, 'La Niña': 0 };
@@ -360,9 +389,24 @@
                             legend: {
                                 position: 'bottom',
                                 labels: { boxWidth: 12, font: { size: 11 } }
+                            },
+                            // Configures chartjs-plugin-datalabels to render slice percentages cleanly
+                            datalabels: {
+                                color: '#ffffff',
+                                font: {
+                                    weight: 'bold',
+                                    size: 10
+                                },
+                                formatter: (value, ctx) => {
+                                    let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    if (sum === 0 || value === 0) return '';
+                                    let percentage = (value * 100 / sum).toFixed(0) + "%";
+                                    return percentage;
+                                }
                             }
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
             }
         });
