@@ -35,47 +35,9 @@
     }
     #header-text h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
     #header-text p { margin: 3px 0 0 0; font-size: 13px; font-weight: bold; opacity: 0.9; }
-    
-    #header-logo {
-        position: absolute;
-        right: 25px; /* Anchors logo to the right side */
-        display: flex;
-        align-items: center;
-    }
-    
-    #header-logo img {
-        height: 40px;
-        width: auto;
-        /* Converts the standard black/colored OCHA logo to pure white */
-        filter: brightness(0) invert(1); 
-    }
 
     /* Map shifted down to accommodate header */
     #map { position: absolute; top: 70px; bottom: 0; width: 100%; }
-    
-    /* Floating Graphic Panel (Bottom Left) */
-    #graphic-panel {
-        position: absolute;
-        bottom: 25px;
-        left: 30px;
-        width: 480px;
-        max-width: 40vw; 
-        z-index: 1000;
-        pointer-events: none; 
-    }
-    #graphic-panel img {
-        width: 100%;
-        height: auto;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-    }
-    #graphic-panel .source-text {
-        font-size: 10px;
-        color: #333;
-        margin-top: 4px;
-        text-shadow: 1px 1px 2px rgba(255,255,255,0.9);
-        font-weight: bold;
-    }
 
     /* Floating Chart Panel (Top Right) */
     #chart-panel {
@@ -147,18 +109,9 @@
         <h1>PACIFIC REGIONAL EL NIÑO MONITORING</h1>
         <p>2026 ADVISORY DASHBOARD</p>
     </div>
-    <div id="header-logo">
-        <img src="https://www.unocha.org/themes/custom/ocha_basic/logo.svg" alt="OCHA Logo">
-    </div>
 </div>
 
 <div id="map"></div>
-
-<!-- Floating Panel for the New Graphic (Bottom Left) -->
-<div id="graphic-panel">
-    <img src="Screenshot%202026-08-25%20at%2011.42.56%20AM.png" alt="Recent and Forecast ENSO Update Graphic">
-    <p class="source-text">Source: Earth Science New Zealand (Sept-Nov 2026)</p>
-</div>
 
 <!-- Floating Panel for the Summary Chart (Top Right) -->
 <div id="chart-panel">
@@ -326,7 +279,7 @@
             }
         });
 
-        // --- 4. POPUP LOGIC WITH REPORTED IMPACTS & SOURCES ---
+        // --- 4. POPUP LOGIC CLEANED (NO IMPACTS OR LINKS) ---
         map.on('click', interactiveLayers, (e) => {
             const coordinates = e.features[0].geometry.coordinates.slice();
             const props = e.features[0].properties;
@@ -340,29 +293,6 @@
             }
             if (country.toUpperCase().includes('MARSHALL')) {
                 status = 'Neutral';
-            }
-
-            // Country-specific reported El Nino impacts & source citations
-            let impactHtml = 'No specific impacts reported at this time.';
-            
-            if (country === 'Solomon Islands') {
-                impactHtml = `Drought conditions linked to ENSO cycles affect food gardens, requiring National Disaster Management Office food distributions. Increased risk of reduced rainfall affecting staple crops and water storage. 
-                <br><br><a href="https://www.adaptation-fund.org/project/enhancing-resilience-of-communities-in-solomon-islands-to-the-adverse-effects-of-climate-change-in-agriculture-and-food-security/" target="_blank" style="color: #418FDE; font-size: 11px; font-weight: bold; text-decoration: none;">🔗 Adaptation Fund / UNDP Resilience Report</a>`;
-            } else if (country === 'Fiji') {
-                impactHtml = `Reduced seasonal rainfall leading to agricultural stress on dryland crops and heightened risks of water dry-spells across parts of the western and northern divisions.
-                <br><br><a href="https://www.unocha.org/publications/report/world/pacific-prepares-strengthening-el-ni-o" target="_blank" style="color: #418FDE; font-size: 11px; font-weight: bold; text-decoration: none;">🔗 OCHA Pacific El Niño Preparedness Report</a>`;
-            } else if (country === 'Papua New Guinea') {
-                impactHtml = `Projections indicate drier-than-normal conditions creating stress on highland agriculture, food security vulnerabilities, and reduced river catchments.
-                <br><br><a href="https://www.unocha.org/publications/report/world/pacific-prepares-strengthening-el-ni-o" target="_blank" style="color: #418FDE; font-size: 11px; font-weight: bold; text-decoration: none;">🔗 OCHA Humanitarian Overview</a>`;
-            } else if (country === 'Palau') {
-                impactHtml = `Elevated risk of prolonged dry spells impacting local water reservoirs and straining agricultural irrigation systems.
-                <br><br><a href="https://niwa.co.nz/climate-and-weather/island-climate-update" target="_blank" style="color: #418FDE; font-size: 11px; font-weight: bold; text-decoration: none;">🔗 NIWA Island Climate Update</a>`;
-            } else if (country === 'Kiribati') {
-                impactHtml = `Historically prone to variable rainfall extremes during strong El Niño events, with heightened monitoring required for freshwater lenses.
-                <br><br><a href="https://www.sprep.org/news/the-pacific-region-sees-abnormal-impacts-of-el-nino-and-a-return-to-neutral-conditions" target="_blank" style="color: #418FDE; font-size: 11px; font-weight: bold; text-decoration: none;">🔗 SPREP Regional ENSO Briefing</a>`;
-            } else {
-                impactHtml = `Strong El Niño cycle active across the tropical Pacific, with heightened monitoring for below-average precipitation trends and agricultural stress.
-                <br><br><a href="https://niwa.co.nz/climate-and-weather/island-climate-update" target="_blank" style="color: #418FDE; font-size: 11px; font-weight: bold; text-decoration: none;">🔗 Earth Sciences New Zealand / NIWA Update</a>`;
             }
 
             let needleAngle = 0; 
@@ -409,10 +339,7 @@
                         <div class="meter-pivot"></div>
                         <div class="meter-needle" style="transform: rotate(${needleAngle}deg);"></div>
                     </div>
-                    
-                    <p style="font-size: 12px; color: #444; text-align: left; border-top: 1px solid #eee; padding-top: 10px; line-height: 1.4;">
-                        <strong>Reported Impacts:</strong><br>${impactHtml}
-                    </p>
+
                 </div>
             `;
 
